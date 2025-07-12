@@ -1,0 +1,21 @@
+# Compiled binaries
+*.exe
+*.bin
+*/bin/
+!*.go # Exclude Go source files if you are ignoring an entire directory containing them
+
+# Go module cache and build artifacts
+vendor/
+go.mod.bak
+go.sum.bak
+
+# Test-related files
+*.test
+*.prof
+
+# IDE and editor specific files (examples)
+.idea/
+.vscode/
+*.swp
+*.bak
+*~
