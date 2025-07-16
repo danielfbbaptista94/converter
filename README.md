@@ -1,5 +1,5 @@
 
-
+A simple CLI converter of images.
 To run just execute the commad:
 
 ```

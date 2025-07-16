@@ -30,14 +30,9 @@ func (cf *CmdFlags) Execute() {
 
 		ConvertImg(fileFrom, extensionFrom, fileTo, extensionTo)
 	case cf.ConvertTxt != "":
-		fileNameFrom, extensionFrom, fileNameTo, extensionTo := cf.separateStringFiles(cf.ConvertImg)
-		if extensionFrom == "docs" && extensionTo == "pdf" {
-			fmt.Println(fileNameFrom)
-			fmt.Println(fileNameTo)
-		} else {
-			fmt.Println("Entrou 2")
-		}
-		// ConvertTxt(parts[0], parts[1])
+		fileFrom, extensionFrom, fileTo, extensionTo := cf.separateStringFiles(cf.ConvertTxt)
+
+		ConvertTxt(fileFrom, extensionFrom, fileTo, extensionTo)
 	default:
 		fmt.Println("Invalid command")
 		os.Exit(1)
