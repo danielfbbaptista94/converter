@@ -7,7 +7,34 @@ import (
 	"io"
 	"log"
 	"strings"
+
+	"github.com/gomutex/godocx"
 )
+
+type Text struct {
+	XMLName xml.Name `xml:"t"`
+	Text    string   `xml:",chardata"`
+}
+
+type Run struct {
+	XMLName xml.Name `xml:"r"`
+	Texts   []Text   `xml:"t"`
+}
+
+type Paragraph struct {
+	XMLName xml.Name `xml:"p"`
+	Runs    []Run    `xml:"r"`
+}
+
+type Body struct {
+	XMLName    xml.Name    `xml:"body"`
+	Paragraphs []Paragraph `xml:"p"`
+}
+
+type Document struct {
+	XMLName xml.Name `xml:"document"`
+	Body    Body     `xml:"body"`
+}
 
 func ReadDocxFile(inputfile string) string {
 	document, err := zip.OpenReader(inputfile)
@@ -32,31 +59,6 @@ func ReadDocxFile(inputfile string) string {
 		}
 	}
 
-	type Text struct {
-		XMLName xml.Name `xml:"t"`
-		Text    string   `xml:",chardata"`
-	}
-
-	type Run struct {
-		XMLName xml.Name `xml:"r"`
-		Texts   []Text   `xml:"t"`
-	}
-
-	type Paragraph struct {
-		XMLName xml.Name `xml:"p"`
-		Runs    []Run    `xml:"r"`
-	}
-
-	type Body struct {
-		XMLName    xml.Name    `xml:"body"`
-		Paragraphs []Paragraph `xml:"p"`
-	}
-
-	type Document struct {
-		XMLName xml.Name `xml:"document"`
-		Body    Body     `xml:"body"`
-	}
-
 	var doc Document
 	err = xml.Unmarshal([]byte(docXML), &doc)
 	if err != nil {
@@ -74,4 +76,19 @@ func ReadDocxFile(inputfile string) string {
 		}
 	}
 	return ""
+}
+
+func WriteDocxFile(outputfile, content string) {
+	file, err := godocx.NewDocument()
+	if err != nil {
+		log.Fatalf("Failed to create a new file: %s", err)
+	}
+	defer file.Close()
+
+	file.AddParagraph(content)
+
+	err = file.SaveTo(outputfile)
+	if err != nil {
+		log.Fatalf("Failed to save file: %s", err)
+	}
 }

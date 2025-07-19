@@ -65,5 +65,16 @@ func ConvertTxt(inputfile, extensionFrom, outputfile, extensionTo string) {
 		fmt.Printf("Unknown format")
 	}
 
+	switch extensionTo {
+	case "txt":
+		txtfiles.WriteTxtFile(outputfile, content)
+	case "docx":
+		txtfiles.WriteDocxFile(outputfile, content)
+	case "odt":
+		txtfiles.WriteOdtFile(outputfile, content)
+	default:
+		fmt.Printf("Unknown format")
+	}
+
 	fmt.Println(content)
 }

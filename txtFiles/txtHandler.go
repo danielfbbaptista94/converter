@@ -2,6 +2,7 @@ package txtfiles
 
 import (
 	"bufio"
+	"io/fs"
 	"log"
 	"os"
 )
@@ -20,4 +21,11 @@ func ReadTxtFile(inputfile string) string {
 		line += scanner.Text() + "\n"
 	}
 	return line
+}
+
+func WriteTxtFile(outputFile, content string) {
+	err := os.WriteFile(outputFile, []byte(content), fs.FileMode(bufio.MaxScanTokenSize))
+	if err != nil {
+		log.Fatalf("Failed to write file: %s", outputFile)
+	}
 }

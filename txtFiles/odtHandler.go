@@ -5,6 +5,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
+	"os"
 )
 
 type OfficeDoc struct {
@@ -49,7 +51,6 @@ func ReadOdtFile(inputfile string) string {
 				fmt.Printf("Error Unmarshal content.xml: %s", err)
 			}
 
-			fmt.Println(content)
 			var output string
 			for _, p := range content.Body.Text.Paragraphs {
 				output += p.Content + "\n"
@@ -60,4 +61,74 @@ func ReadOdtFile(inputfile string) string {
 	}
 
 	return ""
+}
+
+func WriteOdtFile(outputfile, content string) {
+	file, err := os.Create(outputfile)
+	if err != nil {
+		log.Fatalf("Failed to create output file with name: %s", outputfile)
+	}
+	defer file.Close()
+
+	zipWriter := zip.NewWriter(file)
+
+	mimeHeader := &zip.FileHeader{
+		Name:   "mimeHeader",
+		Method: zip.Store,
+	}
+
+	mimeWriter, err := zipWriter.CreateHeader(mimeHeader)
+	if err != nil {
+		log.Fatalf("Failed to create mimeheader, %s", err)
+	}
+
+	_, err = mimeWriter.Write([]byte("application/vnd.oasis.opendocument.text"))
+	if err != nil {
+		log.Fatalf("Failed to write mimeheader, %s", err)
+	}
+
+	contentXML := `<?xml version="1.0" encoding="UTF-8"?>
+		<office:document-content 
+			xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+			xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+			xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+			xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+			office:version="1.2">
+		<office:body>
+			<office:text>
+			<text:p>` + content + `</text:p>
+			</office:text>
+		</office:body>
+		</office:document-content>`
+
+	writer, err := zipWriter.Create("content.xml")
+	if err != nil {
+		log.Fatalf("Failed to create content.xml, %s", err)
+	}
+
+	_, err = writer.Write([]byte(contentXML))
+	if err != nil {
+		log.Fatalf("Failed to write content.xml, %s", err)
+	}
+
+	stylesXML := `<?xml version="1.0" encoding="UTF-8"?>
+		<office:document-styles 
+			xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+			xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+			xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+			office:version="1.2">
+		<office:styles/>
+		</office:document-styles>`
+
+	style, err := zipWriter.Create("style.xml")
+	if err != nil {
+		log.Fatalf("Failed to create style.xml, %s", err)
+	}
+
+	_, err = style.Write([]byte(stylesXML))
+	if err != nil {
+		log.Fatalf("Failed to write style.xml, %s", err)
+	}
+
+	zipWriter.Close()
 }
